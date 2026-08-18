@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "quiz-team/quiz-team",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Личный кабинет квиз-команды: учёт игр, статистика, посещаемость и галерея.",
     "keywords": [
+        "quiz",
+        "statistics",
         "laravel",
-        "framework"
+        "inertia"
     ],
     "license": "MIT",
     "require": {
@@ -15,7 +17,8 @@
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
-        "laravel/wayfinder": "^0.1.14"
+        "laravel/wayfinder": "^0.1.14",
+        "predis/predis": "^3.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
@@ -67,6 +70,7 @@
             "npm run lint:check",
             "npm run format:check",
             "npm run types:check",
+            "npm run test",
             "@test"
         ],
         "types:check": [

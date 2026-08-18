@@ -1,0 +1,87 @@
+x-service-env: &service-env
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_DATABASE: quiz_team
+  DB_USERNAME: quiz_team
+  DB_PASSWORD: secret
+  CACHE_STORE: redis
+  QUEUE_CONNECTION: redis
+  REDIS_CLIENT: predis
+  REDIS_HOST: redis
+
+x-depends-on: &depends-on
+  mysql:
+    condition: service_healthy
+  redis:
+    condition: service_started
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+    env_file:
+      - .env
+    environment: *service-env
+    depends_on:
+      <<: *depends-on
+      assets:
+        condition: service_completed_successfully
+
+  # Собирается из общего образа, а не из node:*, потому что Wayfinder дёргает
+  # `php artisan` внутри `vite build`. Пишет результат в примонтированный
+  # public/build, который затем отдаёт `app`.
+  assets:
+    build: .
+    command: sh -c "npm ci && npm run build"
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+      - node_modules:/var/www/html/node_modules
+    env_file:
+      - .env
+    environment: *service-env
+
+  # Воркер обязателен: конверсии медиа (spatie/laravel-medialibrary) и
+  # генерация «итогов сезона» выполняются в очереди, а не синхронно.
+  queue:
+    build: .
+    command: php artisan queue:work
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+    env_file:
+      - .env
+    environment: *service-env
+    depends_on: *depends-on
+
+  mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: quiz_team
+      MYSQL_USER: quiz_team
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  vendor:
+  node_modules:
+  mysql:
