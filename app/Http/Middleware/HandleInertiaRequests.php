@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -40,12 +41,32 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'locale' => app()->getLocale(),
+            'translations' => $this->translations(),
             'auth' => [
                 'user' => $user,
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
         ];
+    }
+
+    /**
+     * Get the JSON translation lines for the active locale.
+     *
+     * The same file powers __() on the server and t() in the Vue layer, so a
+     * string only ever has to be translated once.
+     *
+     * @return array<string, string>
+     */
+    protected function translations(): array
+    {
+        $path = lang_path(app()->getLocale().'.json');
+
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        return json_decode(File::get($path), true) ?: [];
     }
 }
