@@ -11,6 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { useTranslations } from '@/composables/useTranslations';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
@@ -36,17 +37,21 @@ onMounted(async () => {
         await fetchRecoveryCodes();
     }
 });
+const { t } = useTranslations();
 </script>
 
 <template>
     <Card class="w-full">
         <CardHeader>
             <CardTitle class="flex gap-3">
-                <LockKeyhole class="size-4" />2FA recovery codes
+                <LockKeyhole class="size-4" />{{ t('Recovery codes') }}
             </CardTitle>
             <CardDescription>
-                Recovery codes let you regain access if you lose your 2FA
-                device. Store them in a secure password manager.
+                {{
+                    t(
+                        'Recovery codes let you back in if you lose your device. Keep them in a password manager.',
+                    )
+                }}
             </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,8 +63,11 @@ onMounted(async () => {
                         :is="isRecoveryCodesVisible ? EyeOff : Eye"
                         class="size-4"
                     />
-                    {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} recovery
-                    codes
+                    {{
+                        isRecoveryCodesVisible
+                            ? t('Hide recovery codes')
+                            : t('Show recovery codes')
+                    }}
                 </Button>
 
                 <Form
@@ -75,7 +83,7 @@ onMounted(async () => {
                         type="submit"
                         :disabled="processing"
                     >
-                        <RefreshCw /> Regenerate codes
+                        <RefreshCw /> {{ t('Regenerate codes') }}
                     </Button>
                 </Form>
             </div>
@@ -111,10 +119,11 @@ onMounted(async () => {
                         </div>
                     </div>
                     <p class="text-xs text-muted-foreground select-none">
-                        Each recovery code can be used once to access your
-                        account and will be removed after use. If you need more,
-                        click
-                        <span class="font-bold">Regenerate codes</span> above.
+                        {{
+                            t(
+                                'Each code works once and disappears after use. Generate a new set when you run low.',
+                            )
+                        }}
                     </p>
                 </div>
             </div>

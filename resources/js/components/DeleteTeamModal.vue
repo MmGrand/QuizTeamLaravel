@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/composables/useTranslations';
 import { destroy } from '@/routes/teams';
 import type { Team } from '@/types';
 
@@ -42,6 +43,7 @@ const handleOpenChange = (nextOpen: boolean) => {
         formKey.value++;
     }
 };
+const { t } = useTranslations();
 </script>
 
 <template>
@@ -55,26 +57,32 @@ const handleOpenChange = (nextOpen: boolean) => {
                 @success="handleOpenChange(false)"
             >
                 <DialogHeader>
-                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogTitle>{{ t('Delete team') }}</DialogTitle>
                     <DialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete the team
-                        <strong>"{{ props.team.name }}"</strong>.
+                        {{
+                            t(
+                                'This permanently deletes the team :name and everything in it.',
+                                { name: props.team.name },
+                            )
+                        }}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div class="space-y-4 py-4">
                     <div class="grid gap-2">
                         <Label for="confirmation-name">
-                            Type
-                            <strong>"{{ props.team.name }}"</strong> to confirm
+                            {{
+                                t('Type :name to confirm', {
+                                    name: props.team.name,
+                                })
+                            }}
                         </Label>
                         <Input
                             id="confirmation-name"
                             name="name"
                             data-test="delete-team-name"
                             v-model="confirmationName"
-                            placeholder="Enter team name"
+                            :placeholder="t('Team name')"
                             autocomplete="off"
                         />
                         <InputError :message="errors.name" />
@@ -83,7 +91,7 @@ const handleOpenChange = (nextOpen: boolean) => {
 
                 <DialogFooter class="gap-2">
                     <DialogClose as-child>
-                        <Button variant="secondary"> Cancel </Button>
+                        <Button variant="secondary">{{ t('Cancel') }}</Button>
                     </DialogClose>
 
                     <Button
@@ -92,7 +100,7 @@ const handleOpenChange = (nextOpen: boolean) => {
                         type="submit"
                         :disabled="!canDeleteTeam || processing"
                     >
-                        Delete team
+                        {{ t('Delete team') }}
                     </Button>
                 </DialogFooter>
             </Form>

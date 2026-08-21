@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import Heading from '@/components/Heading.vue';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { computed } from 'vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { useTranslations } from '@/composables/useTranslations';
 import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editProfile } from '@/routes/profile';
@@ -11,66 +11,40 @@ import { edit as editSecurity } from '@/routes/security';
 import { index as teams } from '@/routes/teams';
 import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: editProfile(),
-    },
-    {
-        title: 'Security',
-        href: editSecurity(),
-    },
-    {
-        title: 'Teams',
-        href: teams(),
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-    },
-];
-
+const { t } = useTranslations();
 const { isCurrentOrParentUrl } = useCurrentUrl();
+
+const tabs = computed<NavItem[]>(() => [
+    { title: t('Profile'), href: editProfile() },
+    { title: t('Security'), href: editSecurity() },
+    { title: t('Teams'), href: teams() },
+    { title: t('Appearance'), href: editAppearance() },
+]);
 </script>
 
 <template>
-    <div class="px-4 py-6">
-        <Heading
-            title="Settings"
-            description="Manage your profile and account settings"
-        />
+    <PageHeader :title="t('Settings')" />
 
-        <div class="flex flex-col lg:flex-row lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
-                <nav
-                    class="flex flex-col space-y-1 space-x-0"
-                    aria-label="Settings"
-                >
-                    <Button
-                        v-for="item in sidebarNavItems"
-                        :key="toUrl(item.href)"
-                        variant="ghost"
-                        :class="[
-                            'w-full justify-start',
-                            { 'bg-muted': isCurrentOrParentUrl(item.href) },
-                        ]"
-                        as-child
-                    >
-                        <Link :href="item.href">
-                            <component :is="item.icon" class="h-4 w-4" />
-                            {{ item.title }}
-                        </Link>
-                    </Button>
-                </nav>
-            </aside>
+    <nav
+        class="-mx-1 mb-10 flex items-center gap-1 overflow-x-auto border-b border-border/70 pb-px"
+        :aria-label="t('Settings')"
+    >
+        <Link
+            v-for="tab in tabs"
+            :key="toUrl(tab.href)"
+            :href="tab.href"
+            class="shrink-0 border-b-2 px-3 pb-2.5 text-sm transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            :class="
+                isCurrentOrParentUrl(tab.href)
+                    ? 'border-foreground font-medium text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+            "
+        >
+            {{ tab.title }}
+        </Link>
+    </nav>
 
-            <Separator class="my-6 lg:hidden" />
-
-            <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
-                    <slot />
-                </section>
-            </div>
-        </div>
+    <div class="max-w-xl space-y-12">
+        <slot />
     </div>
 </template>

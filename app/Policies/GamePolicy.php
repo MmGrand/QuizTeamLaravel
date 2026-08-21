@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Policies;
+
+use App\Enums\TeamPermission;
+use App\Models\Game;
+use App\Models\Team;
+use App\Models\User;
+
+class GamePolicy
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user, Team $team): bool
+    {
+        return $user->belongsToTeam($team);
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Game $game): bool
+    {
+        return $user->belongsToTeam($game->team);
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user, Team $team): bool
+    {
+        return $user->belongsToTeam($team);
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Game $game): bool
+    {
+        return $user->belongsToTeam($game->team);
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Game $game): bool
+    {
+        return $user->hasTeamPermission($game->team, TeamPermission::DeleteGame);
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Game $game): bool
+    {
+        return $user->hasTeamPermission($game->team, TeamPermission::DeleteGame);
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Game $game): bool
+    {
+        return $user->hasTeamPermission($game->team, TeamPermission::DeleteGame);
+    }
+}

@@ -11,6 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslations } from '@/composables/useTranslations';
 import { destroy as destroyInvitation } from '@/routes/teams/invitations';
 import type { Team, TeamInvitation } from '@/types';
 
@@ -38,23 +39,26 @@ const cancelInvitation = () => {
         onSuccess: () => emit('update:open', false),
     });
 };
+const { t } = useTranslations();
 </script>
 
 <template>
     <Dialog :open="props.open" @update:open="emit('update:open', $event)">
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Cancel invitation</DialogTitle>
+                <DialogTitle>{{ t('Cancel invitation') }}</DialogTitle>
                 <DialogDescription>
-                    Are you sure you want to cancel the invitation for
-                    <strong>{{ props.invitation?.email }}</strong
-                    >?
+                    {{
+                        t('Cancel the invitation sent to :email?', {
+                            email: props.invitation?.email ?? '',
+                        })
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
             <DialogFooter class="gap-2">
                 <DialogClose as-child>
-                    <Button variant="secondary"> Keep invitation </Button>
+                    <Button variant="secondary">{{ t('Close') }}</Button>
                 </DialogClose>
 
                 <Button
@@ -63,7 +67,7 @@ const cancelInvitation = () => {
                     :disabled="processing"
                     @click="cancelInvitation"
                 >
-                    Cancel invitation
+                    {{ t('Cancel invitation') }}
                 </Button>
             </DialogFooter>
         </DialogContent>

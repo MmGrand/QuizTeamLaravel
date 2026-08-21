@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslations } from '@/composables/useTranslations';
 import type { DashboardInvitation } from '@/types';
 
 type Props = {
@@ -39,15 +40,20 @@ const declineInvitation = (invitation: DashboardInvitation) => {
         },
     });
 };
+const { t } = useTranslations();
 </script>
 
 <template>
     <Dialog v-model:open="open">
         <DialogContent data-test="pending-invitations-modal">
             <DialogHeader>
-                <DialogTitle>Pending team invitations</DialogTitle>
+                <DialogTitle>{{ t('Pending invitations') }}</DialogTitle>
                 <DialogDescription>
-                    Accept or decline the teams you have been invited to join.
+                    {{
+                        t(
+                            'Accept or decline the teams you have been invited to join.',
+                        )
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -56,13 +62,16 @@ const declineInvitation = (invitation: DashboardInvitation) => {
                     v-for="invitation in props.invitations"
                     :key="invitation.code"
                     data-test="pending-invitation-row"
-                    class="rounded-lg border p-4"
+                    class="rounded-lg border border-border/70 p-4"
                 >
                     <div class="space-y-1">
                         <p class="font-medium">{{ invitation.team.name }}</p>
                         <p class="text-sm text-muted-foreground">
-                            {{ invitation.inviterName }} invited you to join
-                            this team.
+                            {{
+                                t(':name invited you to this team.', {
+                                    name: invitation.inviterName,
+                                })
+                            }}
                         </p>
                     </div>
 
@@ -73,7 +82,7 @@ const declineInvitation = (invitation: DashboardInvitation) => {
                             :disabled="processingCode === invitation.code"
                             @click="declineInvitation(invitation)"
                         >
-                            Decline
+                            {{ t('Decline') }}
                         </Button>
 
                         <Button
@@ -81,7 +90,7 @@ const declineInvitation = (invitation: DashboardInvitation) => {
                             :disabled="processingCode === invitation.code"
                             @click="acceptInvitation(invitation)"
                         >
-                            Accept
+                            {{ t('Accept') }}
                         </Button>
                     </div>
                 </div>

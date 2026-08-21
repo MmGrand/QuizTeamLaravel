@@ -1,32 +1,29 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AppearanceTabs from '@/components/AppearanceTabs.vue';
-import Heading from '@/components/Heading.vue';
-import { edit } from '@/routes/appearance';
+import LocaleToggle from '@/components/LocaleToggle.vue';
+import SectionHeading from '@/components/SectionHeading.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
+import { useTranslations } from '@/composables/useTranslations';
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Appearance settings',
-                href: edit(),
-            },
-        ],
-    },
-});
+const { t } = useTranslations();
 </script>
 
 <template>
-    <Head title="Appearance settings" />
+    <Head :title="t('Appearance')" />
 
-    <h1 class="sr-only">Appearance settings</h1>
-
-    <div class="space-y-6">
-        <Heading
-            variant="small"
-            title="Appearance settings"
-            description="Update the appearance settings for your account"
+    <section class="space-y-4">
+        <SectionHeading
+            :title="t('Appearance')"
+            :description="t('Choose how the interface looks')"
         />
-        <AppearanceTabs />
-    </div>
+        <ThemeToggle />
+    </section>
+
+    <section class="space-y-4">
+        <SectionHeading
+            :title="t('Language')"
+            :description="t('Choose the interface language')"
+        />
+        <LocaleToggle />
+    </section>
 </template>
