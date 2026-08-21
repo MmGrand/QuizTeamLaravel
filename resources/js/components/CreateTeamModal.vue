@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/composables/useTranslations';
 import { store } from '@/routes/teams';
 
 const open = ref(false);
@@ -27,6 +28,7 @@ function handleOpenChange(value: boolean) {
         formKey.value++;
     }
 }
+const { t } = useTranslations();
 </script>
 
 <template>
@@ -43,19 +45,19 @@ function handleOpenChange(value: boolean) {
                 @success="open = false"
             >
                 <DialogHeader>
-                    <DialogTitle>Create a new team</DialogTitle>
+                    <DialogTitle>{{ t('Create a new team') }}</DialogTitle>
                     <DialogDescription>
-                        Create a new team to collaborate with others.
+                        {{ t('Create a new team to collaborate with others.') }}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div class="grid gap-2">
-                    <Label for="name">Team name</Label>
+                    <Label for="name">{{ t('Team name') }}</Label>
                     <Input
                         id="name"
                         name="name"
                         data-test="create-team-name"
-                        placeholder="My team"
+                        :placeholder="t('Team name')"
                         required
                     />
                     <InputError :message="errors.name" />
@@ -63,7 +65,7 @@ function handleOpenChange(value: boolean) {
 
                 <DialogFooter class="gap-2">
                     <DialogClose as-child>
-                        <Button variant="secondary"> Cancel </Button>
+                        <Button variant="secondary">{{ t('Cancel') }}</Button>
                     </DialogClose>
 
                     <Button
@@ -71,7 +73,7 @@ function handleOpenChange(value: boolean) {
                         data-test="create-team-submit"
                         :disabled="processing"
                     >
-                        Create team
+                        {{ t('Create a new team') }}
                     </Button>
                 </DialogFooter>
             </Form>

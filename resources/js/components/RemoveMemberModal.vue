@@ -11,6 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslations } from '@/composables/useTranslations';
 import { destroy as destroyMember } from '@/routes/teams/members';
 import type { Team, TeamMember } from '@/types';
 
@@ -38,22 +39,26 @@ const removeMember = () => {
         onSuccess: () => emit('update:open', false),
     });
 };
+const { t } = useTranslations();
 </script>
 
 <template>
     <Dialog :open="props.open" @update:open="emit('update:open', $event)">
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Remove team member</DialogTitle>
+                <DialogTitle>{{ t('Remove member') }}</DialogTitle>
                 <DialogDescription>
-                    Are you sure you want to remove
-                    <strong>{{ props.member?.name }}</strong> from this team?
+                    {{
+                        t('Remove :name from this team?', {
+                            name: props.member?.name ?? '',
+                        })
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
             <DialogFooter class="gap-2">
                 <DialogClose as-child>
-                    <Button variant="secondary"> Cancel </Button>
+                    <Button variant="secondary">{{ t('Cancel') }}</Button>
                 </DialogClose>
 
                 <Button
@@ -62,7 +67,7 @@ const removeMember = () => {
                     :disabled="processing"
                     @click="removeMember"
                 >
-                    Remove member
+                    {{ t('Remove member') }}
                 </Button>
             </DialogFooter>
         </DialogContent>
