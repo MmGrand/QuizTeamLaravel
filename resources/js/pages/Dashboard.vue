@@ -1,60 +1,116 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { ArrowRight, Plus } from '@lucide/vue';
+import { computed } from 'vue';
+import {
+    create as createGame,
+    index as gamesIndex,
+} from '@/actions/App/Http/Controllers/GameController';
+import GameRow from '@/components/GameRow.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import PendingInvitationsModal from '@/components/PendingInvitationsModal.vue';
-import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
-import { dashboard } from '@/routes';
-import type { DashboardInvitation, Team } from '@/types';
+import StatTile from '@/components/StatTile.vue';
+import { Button } from '@/components/ui/button';
+import { useFormatters } from '@/composables/useFormatters';
+import { useTranslations } from '@/composables/useTranslations';
+import type { DashboardInvitation, GameSummary, TeamStats } from '@/types';
 
-defineProps<{
+type Props = {
     pendingInvitations?: DashboardInvitation[];
-}>();
+    stats?: TeamStats | null;
+    recentGames?: GameSummary[];
+};
 
-defineOptions({
-    layout: (props: { currentTeam?: Team | null }) => ({
-        breadcrumbs: [
-            {
-                title: 'Dashboard',
-                href: props.currentTeam
-                    ? dashboard(props.currentTeam.slug)
-                    : '/',
-            },
-        ],
-    }),
+const props = withDefaults(defineProps<Props>(), {
+    recentGames: () => [],
 });
+
+const page = usePage();
+const { t } = useTranslations();
+const { formatScore } = useFormatters();
+
+const teamSlug = computed(() => page.props.currentTeam?.slug ?? '');
+const hasGames = computed(() => (props.stats?.gamesCount ?? 0) > 0);
+
+const dash = '—';
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head :title="t('Overview')" />
 
     <PendingInvitationsModal
         v-if="pendingInvitations && pendingInvitations.length > 0"
         :invitations="pendingInvitations"
     />
 
-    <div
-        class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+    <PageHeader
+        :title="page.props.currentTeam?.name ?? t('Overview')"
+        :description="
+            t(
+                'Games, results, line-ups and the whole history of your team in one place.',
+            )
+        "
     >
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
-        </div>
-        <div
-            class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-        >
-            <PlaceholderPattern />
-        </div>
+        <template #actions>
+            <Button size="sm" as-child>
+                <Link :href="createGame(teamSlug)">
+                    <Plus /> {{ t('Record a game') }}
+                </Link>
+            </Button>
+        </template>
+    </PageHeader>
+
+    <div v-if="stats" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile
+            :label="t('Games played')"
+            :value="String(stats.gamesCount)"
+        />
+        <StatTile
+            :label="t('Total points')"
+            :value="formatScore(stats.totalScore)"
+        />
+        <StatTile
+            :label="t('Average score')"
+            :value="
+                stats.averageScore === null
+                    ? dash
+                    : formatScore(stats.averageScore)
+            "
+        />
+        <StatTile :label="t('Wins')" :value="String(stats.wins)" />
     </div>
+
+    <section class="mt-12">
+        <div class="mb-1 flex items-baseline justify-between gap-4">
+            <h2 class="text-base font-medium tracking-tight">
+                {{ t('Recent games') }}
+            </h2>
+
+            <Link
+                v-if="hasGames"
+                :href="gamesIndex(teamSlug)"
+                class="inline-flex items-center gap-1 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+                {{ t('All games') }}
+                <ArrowRight class="size-3.5" />
+            </Link>
+        </div>
+
+        <div v-if="recentGames.length > 0" class="divide-y divide-border/70">
+            <GameRow
+                v-for="game in recentGames"
+                :key="game.id"
+                :game="game"
+                data-test="dashboard-game-row"
+            />
+        </div>
+
+        <p
+            v-else
+            data-test="dashboard-empty-state"
+            class="py-10 text-sm text-muted-foreground"
+        >
+            {{ t("Add the first one and the team's history starts here.") }}
+        </p>
+    </section>
 </template>
